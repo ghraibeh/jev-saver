@@ -2,6 +2,8 @@
 
 **Live demo:** https://g-connect.space/jev-saver/ · **Docs:** https://g-connect.space/jev-saver/docs.html
 
+![jev-saver demo: a message answered locally, with the decision route on the right](docs/img/demo-local.png)
+
 A small local memory layer in front of [TypeSafe Jev](https://typesafe.ai) for repeated **Choice** decisions.
 
 - If a new input looks like inputs it has already seen, and those inputs agree, it **answers locally**. No Jev call is made.
@@ -10,6 +12,29 @@ A small local memory layer in front of [TypeSafe Jev](https://typesafe.ai) for r
 It runs on CPU and keeps a small, saveable memory file.
 
 > **What this is, honestly:** semantic caching plus nearest-neighbour voting. It does **not** understand anything new. It only re-uses answers for inputs that look like inputs it has already seen. A rephrasing with different words often still goes to Jev. If your traffic rarely repeats, it will save little.
+
+## Screenshots
+
+**Answered locally.** The message looked like ones already in memory, so Jev was not called (35 ms).
+
+![Answered locally](docs/img/demo-local.png)
+
+**Asked Jev, then remembered.** The memory was unsure (closest similarity 0.83), so it asked Jev (306 ms) and stored the answer. A repeat is answered locally.
+
+![Asked Jev](docs/img/demo-jev.png)
+
+**Bring your own key.** The key is kept in the browser only, and the server does not store it.
+
+![Settings](docs/img/settings.png)
+
+<table><tr>
+<td width="62%"><b>Architecture</b><br><img src="docs/img/architecture.png" alt="Architecture"></td>
+<td width="38%"><b>Mobile</b><br><img src="docs/img/mobile.png" alt="Mobile" width="260"></td>
+</tr></table>
+
+**Benchmarks page**
+
+![Benchmarks](docs/img/benchmarks.png)
 
 ## Why
 
