@@ -1,5 +1,7 @@
 # jev-saver
 
+**Live demo:** https://g-connect.space/jev-saver/ · **Docs:** https://g-connect.space/jev-saver/docs.html
+
 A small local memory layer in front of [TypeSafe Jev](https://typesafe.ai) for repeated **Choice** decisions.
 
 - If a new input looks like inputs it has already seen, and those inputs agree, it **answers locally**. No Jev call is made.
