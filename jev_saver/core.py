@@ -34,6 +34,8 @@ class Decision:
     top: list = field(default_factory=list)
     closest_similarity: float = 0.0
     ms: float = 0.0
+    timings: dict = field(default_factory=dict)   # ms per step: embed, search, jev, learn
+    learned: bool = False
 
 
 class JevSaver:
@@ -142,30 +144,40 @@ class JevSaver:
         return top[0][0], top[0][1], top, float(v[0]), sure
 
     # ---------- Jev ----------
-    def _jev_http(self, text: str):
-        if not self.api_key:
+    def _jev_http(self, text: str, api_key: str | None = None):
+        key = api_key or self.api_key
+        if not key:
             raise RuntimeError("no Jev key: set TYPESAFE_API_KEY or pass api_key=")
         body = {"state": text, "model": self.model, "questions": {"q": {
             "type": "choice", "instructions": self.instructions, "criteria": self.labels}}}
         req = urllib.request.Request(JEV_URL, data=json.dumps(body).encode(), headers={
-            "Content-Type": "application/json", "Authorization": "Bearer " + self.api_key})
+            "Content-Type": "application/json", "Authorization": "Bearer " + key})
         a = json.loads(urllib.request.urlopen(req, timeout=60).read())["answers"]["q"]
         probs = sorted((a.get("probabilities") or {}).items(), key=lambda kv: -kv[1])[:3]
         return a["choice"], float(a.get("confidence") or 0.0), probs
 
     # ---------- public ----------
-    def decide(self, text: str, learn: bool = True) -> Decision:
-        t = time.perf_counter()
+    def decide(self, text: str, learn: bool = True, api_key: str | None = None) -> Decision:
+        """api_key: optional per-call Jev key (e.g. one supplied by the end user); never stored."""
+        ms = lambda a, b: (b - a) * 1000
+        t0 = time.perf_counter()
         x = self.embed([text])[0]
+        t1 = time.perf_counter()
         choice, conf, top, sim, sure = self._local(x)
+        t2 = time.perf_counter()
+        tm = {"embed": ms(t0, t1), "search": ms(t1, t2)}
         if sure:
             self.stats["local"] += 1
-            return Decision(choice, conf, "local", top, sim, (time.perf_counter() - t) * 1000)
-        jc, jconf, jtop = self._ask_jev(text)
+            return Decision(choice, conf, "local", top, sim, ms(t0, t2), tm)
+        jc, jconf, jtop = self._ask_jev(text) if api_key is None else self._jev_http(text, api_key)
+        t3 = time.perf_counter()
         self.stats["jev"] += 1
+        learned = False
         if learn and jc in self.index and jconf >= self.min_jev_confidence:
-            self.learn(x, jc)
-        return Decision(jc, jconf, "jev", jtop, sim, (time.perf_counter() - t) * 1000)
+            self.learn(x, jc); learned = True
+        t4 = time.perf_counter()
+        tm.update(jev=ms(t2, t3), learn=ms(t3, t4))
+        return Decision(jc, jconf, "jev", jtop, sim, ms(t0, t4), tm, learned)
 
     def saved_fraction(self) -> float:
         n = self.stats["local"] + self.stats["jev"]

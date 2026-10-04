@@ -49,6 +49,10 @@ Main knobs:
 - `exact_similarity`: above this, the closest stored input is treated as the same input.
 - `min_jev_confidence`: do not store Jev answers that are below this confidence.
 
+You can also pass a per-call key with `decide(text, api_key=...)`, for example a key supplied by your end user. It is not stored.
+
+Each `Decision` includes `timings` (in ms) for embed, search, jev and learn, plus `learned`.
+
 ## Benchmark (offline, reproducible)
 
 Run `python benchmarks/banking77.py`. It uses BANKING77 (77 intents) and needs no key.
@@ -63,6 +67,21 @@ Setup: 3,080 test messages in random order. The saver answers locally when it is
 | cold start (empty memory, learns only from the stream) | **53%** | **97.4%** | 42 |
 
 Cold start, by quarter of the stream: 31% → 54% → 65% → 64% answered locally.
+
+### Threshold sweep
+
+Run it with `python benchmarks/sweep.py`.
+
+| start | min_similarity | min_margin | saved | local correct | mistakes |
+|---|---|---|---|---|---|
+| warm | 0.85 | 0.3 | 92% | 96.9% | 87 |
+| warm | **0.90** | **0.3** (default) | **87%** | **97.6%** | **65** |
+| warm | 0.94 | 0.6 | 64% | 98.9% | 22 |
+| cold | 0.85 | 0.3 | 68% | 95.3% | 99 |
+| cold | **0.90** | **0.3** (default) | **53%** | **97.4%** | **42** |
+| cold | 0.94 | 0.6 | 30% | 98.1% | 17 |
+
+Raising either threshold means fewer local answers and fewer mistakes. Lowering them means more saving and more confident mistakes.
 
 ## Limits we measured
 
