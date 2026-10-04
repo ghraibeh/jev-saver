@@ -42,6 +42,20 @@ saver.warm_start(texts, labels)  # optional: pre-fill from labelled data you alr
 saver.save("memory.npz")         # reuse later: saver.load("memory.npz")
 ```
 
+### Pre-fill memory (warm start)
+
+If you already have labelled examples, load them before going live. No Jev calls are made. In the benchmark below, pre-filling raised calls saved from 53% to 87%.
+
+```python
+import csv
+rows = [r for r in csv.DictReader(open("tickets.csv")) if r["label"] in saver.labels]   # columns: text, label
+saver.warm_start([r["text"] for r in rows], [r["label"] for r in rows])
+saver.save("memory.npz")                       # once
+saver = JevSaver(labels, instructions).load("memory.npz")   # in production
+```
+
+Sources you can use: tickets your team already tagged, logged Jev answers (keep only high-confidence ones), or a public dataset. You can also run `decide()` over a sample of real messages once with `min_jev_confidence=0.9`. Every label must exactly match a key in `labels`. Wrong labels get pre-filled too, so use only labels you trust.
+
 Main knobs:
 
 - `min_similarity`: how close a stored input must be before the saver answers locally.
