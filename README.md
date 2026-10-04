@@ -133,6 +133,10 @@ Raising either threshold means fewer local answers and fewer mistakes. Lowering 
 
 ## Related work
 
+- [Jevstiller](https://github.com/tomerglick57/Jevstiller): the closest project. It trains a small head on frozen bge-small embeddings from Jev's recorded answers, and answers locally under a measured disagreement bound. jev-saver is simpler: there is no training step, just a nearest-neighbour vote with thresholds. It also has no statistical guarantee.
+- [stuntd](https://github.com/bladedevoff/stuntd): a local proxy that learns from Jev and falls back to it.
+- [decision-gate](https://github.com/zachlandes/decision-gate): handles Jev rate limits, with an optional answer cache.
+
 - [GPTCache](https://github.com/zilliztech/GPTCache): semantic cache for LLMs.
 - [jevcache](https://github.com/hyperspaceai/jevcache): exact-match cache for Jev decisions.
 - FrugalGPT, [arXiv:2305.05176](https://arxiv.org/abs/2305.05176): cascades that defer to a larger model only when needed.
