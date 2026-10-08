@@ -2,6 +2,8 @@
 
 **Live demo:** https://g-connect.space/jev-saver/ · **Docs:** https://g-connect.space/jev-saver/docs.html
 
+**Video:** [How it works in 7 minutes](https://youtu.be/oV2FMxDExWQ) · more on [AI unboxed](https://www.youtube.com/@unboxed_AI_tech)
+
 ![jev-saver demo: a message answered locally, with the decision route on the right](docs/img/demo-local.png)
 
 A small local memory layer in front of [TypeSafe Jev](https://typesafe.ai) for repeated **Choice** decisions.
